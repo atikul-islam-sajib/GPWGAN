@@ -46,10 +46,10 @@ class Critic(nn.Module):
         """
         super(Critic, self).__init__()
         self.layers_config = [
-            (28 * 28, 1024, 0.2),
-            (1024, 512, 0.2),
+            (28 * 28, 512, 0.2),
             (512, 256, 0.2),
-            (256, 1),
+            (256, 128, 0.2),
+            (128, 1),
         ]
         self.model = self.connected_layer(self.layers_config)
 
@@ -78,7 +78,7 @@ class Critic(nn.Module):
                     in_features=in_features, out_features=out_features
                 )
                 layers["{}_activation".format(index)] = nn.LeakyReLU(
-                    negative_slope=negative_slope
+                    negative_slope=negative_slope, inplace=True
                 )
 
             (in_features, out_features) = layers_config[-1]

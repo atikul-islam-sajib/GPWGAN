@@ -59,6 +59,7 @@ class Trainer:
         beta2=0.999,
         device="cpu",
         n_critic_step=5,
+        display=True,
     ):
         """
         Initializes the Trainer object with the specified configuration and sets up the neural network models, dataloader, loss function, and optimizers.
@@ -80,6 +81,7 @@ class Trainer:
         self.device = device
         self.clamp_value = 0.01
         self.n_critic_step = n_critic_step
+        self.display = display
 
         self.device_cuda = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.device_mps = torch.device(
@@ -102,15 +104,13 @@ class Trainer:
         except Exception as e:
             logging.exception("Dataloader is not transformed from pickle".capitalize())
 
-        self.optimizer_generator = optim.Adam(
+        self.optimizer_generator = optim.RMSprop(
             params=self.generator.parameters(),
             lr=self.learning_rate,
-            betas=(self.beta1, self.beta2),
         )
-        self.optimizer_critic = optim.Adam(
+        self.optimizer_critic = optim.RMSprop(
             params=self.critic.parameters(),
             lr=self.learning_rate,
-            betas=(self.beta1, self.beta2),
         )
 
         self.critic_loss = list()
@@ -206,6 +206,13 @@ class Trainer:
 
         return generated_loss.item()
 
+    def display_performance(self, **kwargs):
+        print(f"Epoch [{kwargs['epoch'] + 1}/{kwargs['epochs']}] Completed")
+        print(
+            f"Average Critic Loss: {kwargs['avg_critic_loss']:.4f},\
+            Average Generator Loss: {kwargs['avg_generator_loss']:.4f}"
+        )
+
     def train_WGAN(self):
         """
         Conducts the training loop for the Wasserstein Generative Adversarial Network (WGAN).
@@ -244,7 +251,6 @@ class Trainer:
                 D_loss = self.train_critic(
                     real_samples=real_samples, fake_samples=fake_samples
                 )
-                c_loss.append(D_loss)
 
                 # Clamp the weights of the critic
                 for params in self.critic.parameters():
@@ -253,12 +259,24 @@ class Trainer:
                 if (index + 1) % self.n_critic_step == 0:
                     generated_samples = self.generator(noise_samples)
                     G_loss = self.train_generator(generated_samples=generated_samples)
+
+                    c_loss.append(D_loss)
                     g_loss.append(G_loss)
 
             avg_critic_loss = np.mean(c_loss)
             avg_generator_loss = np.mean(g_loss)
             self.critic_loss.append(avg_critic_loss)
             self.generator_loss.append(avg_generator_loss)
+
+            if self.display:
+                self.display_performance(
+                    epochs=self.epochs,
+                    epoch=epoch,
+                    avg_critic_loss=avg_critic_loss,
+                    avg_generator_loss=avg_generator_loss,
+                )
+            else:
+                raise Exception("Please set display to True".capitalize)
 
             logging.info(f"Epoch [{epoch + 1}/{self.epochs}] Completed")
             logging.info(
@@ -287,6 +305,8 @@ if __name__ == "__main__":
     - `--epochs`: Number of epochs for training.
     - `--latent_space`: Size of the latent space for the generator.
     - `--lr`: Learning rate for the optimizer.
+    - `--device`: Train the model with CPU, GPU, MPS.
+    - `--critic_steps`: Critic steps used to give the priority to the Critic rather Generator.
     """
 
     parser = argparse.ArgumentParser(description="GAN Training".title())
@@ -305,6 +325,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--critic_steps", type=int, default=5, help="Critic steps".capitalize()
     )
+    parser.add_argument(
+        "--display", default=True, help="Display steps of each training".capitalize()
+    )
 
     args = parser.parse_args()
 
@@ -314,6 +337,7 @@ if __name__ == "__main__":
         and args.lr
         and args.device
         and args.critic_steps
+        and args.display
     ):
         logging.info("Training started".capitalize())
 
@@ -323,6 +347,7 @@ if __name__ == "__main__":
             lr=args.lr,
             device=args.device,
             n_critic_step=args.critic_steps,
+            display=args.display,
         )
         trainer.train_WGAN()
 

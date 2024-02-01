@@ -55,10 +55,10 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
 
         self.layers_config = [
-            (self.latent_space, 256, 0.2),
+            (self.latent_space, 128, 0.2),
+            (128, 256, 0.2),
             (256, 512, 0.2),
-            (512, 1024, 0.2),
-            (1024, 28 * 28),
+            (512, 28 * 28),
         ]
         self.model = self.connected_layer(self.layers_config)
 
@@ -87,9 +87,7 @@ class Generator(nn.Module):
                 layers["{}_layer".format(index)] = nn.Linear(
                     in_features=in_features, out_features=out_features
                 )
-                layers["{}_activation".format(index)] = nn.LeakyReLU(
-                    negative_slope=negative_slope
-                )
+                layers["{}_activation".format(index)] = nn.ReLU(inplace=True)
 
             (in_features, out_features) = layers_config[-1]
             layers["out_layer"] = nn.Linear(
