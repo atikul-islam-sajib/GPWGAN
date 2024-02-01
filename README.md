@@ -120,7 +120,7 @@ For detailed documentation on the implementation and usage, visit the [GPCGAN Do
 
 ## Notebook Training
 
-For detailed documentation on the implementation and usage using notebook, visit the [Notebook](./notebooks/ModelTrain-CGAN.ipynb).
+For detailed documentation on the implementation and usage using notebook, visit the [Notebook](./notebooks/ModelTrain_WGAN.ipynb).
 
 ## Contributing
 
