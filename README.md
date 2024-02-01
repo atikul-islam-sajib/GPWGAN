@@ -1,3 +1,5 @@
+![GPCGAN](./outputs/synthetic_image.png)
+
 # GPWGAN - Generative Adversarial Network for MNIST Dataset: Wasserstein Generative Models
 
 ## Overview
@@ -94,7 +96,7 @@ The core script sets up the necessary components for training the GAN. Here's a 
 
 ```python
 from src.data_loader import Loader
-from src.train import Trainer
+from src.trainer import Trainer
 from src.test import Test
 
 # Initialize the data loader with batch size
@@ -102,7 +104,7 @@ loader = Loader(batch_size = 64)
 loader.create_loader(mnist_data = loader.download_mnist())
 
 # Set up the trainer with learning rate, epochs, and latent space size
-trainer = Trainer(latent_space = 100, epochs = 10, lr = 0.0005, device = 'gpu', batch_size = 64, n_critic_step = 5, clip_value = 0.01)
+trainer = Trainer(latent_space = 100, epochs = 10, lr = 0.0005, device = 'gpu')
 trainer.train_WGAN()
 
 # Test the generated dataset and display the synthetic images
