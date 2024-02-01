@@ -1,4 +1,4 @@
-# GPWGAN - Generative Adversarial Network for MNIST Dataset: Wassterstein Generative Models
+# GPWGAN - Generative Adversarial Network for MNIST Dataset: Wasserstein Generative Models
 
 ## Overview
 
@@ -47,7 +47,7 @@ python /path/to/GPWGAN/src/cli.py --help
 - `--test`: Run tests with synthetic data to validate model performance.
 - `--device`: Train the model with CPU, GPU, MPS.
 - `--critic_steps`: Critic steps used to give the priority to the Critic rather Generator.
-- `--display`: Display the critic loss and generator loss in each iterations
+- `--display`: Display the critic loss and generator loss in each iterations[True/False]
 
 ## Training and Generating Images(CLI)
 
