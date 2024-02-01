@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Trainer - Wasserstein GAN</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Trainer";
+        var mkdocs_page_input_path = "trainer.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Wasserstein GAN
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data_loader/">DataLoader</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../generator/">Generator</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../critic/">Critic</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Trainer</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../test/">Test</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../cli/">Command Line</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../utils/">Utils</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Wasserstein GAN</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Trainer</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <div class="doc doc-object doc-module">
+
+
+
+<a id="trainer"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="trainer.Trainer" class="doc doc-heading">
+          <code>Trainer</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>The <code>Trainer</code> class encapsulates the training process for a Wasserstein Generative Adversarial Network (WGAN) composed of a generator and a critic. It manages the training loop, loss computations, parameter updates, and enforces the Lipschitz constraint through weight clipping.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>latent_space</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Dimensionality of the generator's input latent space.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epochs</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Total number of training epochs.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>learning_rate</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Learning rate for the Adam optimizers.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>beta1</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Beta1 hyperparameter for the Adam optimizer.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>beta2</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>Beta2 hyperparameter for the Adam optimizer.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>generator</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="generator.Generator" href="../generator/#generator.Generator">Generator</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The generator model of the WGAN.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>critic</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="critic.Critic" href="../critic/#critic.Critic">Critic</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The critic model of the WGAN.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dataloader</code></b>
+                  (<code>DataLoader</code>)
+              –
+              <div class="doc-md-description">
+                <p>DataLoader providing the training data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>optimizer_generator</code></b>
+                  (<code><span title="torch.Optimizer">Optimizer</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Optimizer for updating the generator's weights.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>optimizer_critic</code></b>
+                  (<code><span title="torch.Optimizer">Optimizer</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Optimizer for updating the critic's weights.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>critic_loss</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>List to record the critic's loss after each epoch.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>generator_loss</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>List to record the generator's loss after each epoch.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>device</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The device ('cuda', 'mps', or 'cpu') on which the models will run.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_critic_step</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of critic updates per generator update.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>clamp_value</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>The clamp value for the critic's weight clipping.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+  <p><strong>Methods:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+          <tr>
+            <td><code><a class="autorefs autorefs-internal" title="trainer.Trainer.connect_gpu" href="#trainer.Trainer.connect_gpu">connect_gpu</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Assigns the generator and critic models to the specified device.</p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><code><a class="autorefs autorefs-internal" title="trainer.Trainer.saved_checkpoints" href="#trainer.Trainer.saved_checkpoints">saved_checkpoints</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Saves a checkpoint of the model at the specified epoch.</p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><code><a class="autorefs autorefs-internal" title="trainer.Trainer.train_critic" href="#trainer.Trainer.train_critic">train_critic</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Trains the critic model for one batch of data.</p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><code><a class="autorefs autorefs-internal" title="trainer.Trainer.train_generator" href="#trainer.Trainer.train_generator">train_generator</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Trains the generator model for one batch of data.</p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><code><a class="autorefs autorefs-internal" title="trainer.Trainer.train_WGAN" href="#trainer.Trainer.train_WGAN">train_WGAN</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Conducts the training loop for the WGAN.</p>
+              </div>
+            </td>
+          </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>trainer.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The `Trainer` class encapsulates the training process for a Wasserstein Generative Adversarial Network (WGAN) composed of a generator and a critic. It manages the training loop, loss computations, parameter updates, and enforces the Lipschitz constraint through weight clipping.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        latent_space (int): Dimensionality of the generator&#39;s input latent space.</span>
+<span class="sd">        epochs (int): Total number of training epochs.</span>
+<span class="sd">        learning_rate (float): Learning rate for the Adam optimizers.</span>
+<span class="sd">        beta1 (float): Beta1 hyperparameter for the Adam optimizer.</span>
+<span class="sd">        beta2 (float): Beta2 hyperparameter for the Adam optimizer.</span>
+<span class="sd">        generator (Generator): The generator model of the WGAN.</span>
+<span class="sd">        critic (Critic): The critic model of the WGAN.</span>
+<span class="sd">        dataloader (DataLoader): DataLoader providing the training data.</span>
+<span class="sd">        optimizer_generator (optim.Optimizer): Optimizer for updating the generator&#39;s weights.</span>
+<span class="sd">        optimizer_critic (optim.Optimizer): Optimizer for updating the critic&#39;s weights.</span>
+<span class="sd">        critic_loss (list): List to record the critic&#39;s loss after each epoch.</span>
+<span class="sd">        generator_loss (list): List to record the generator&#39;s loss after each epoch.</span>
+<span class="sd">        device (str): The device (&#39;cuda&#39;, &#39;mps&#39;, or &#39;cpu&#39;) on which the models will run.</span>
+<span class="sd">        n_critic_step (int): Number of critic updates per generator update.</span>
+<span class="sd">        clamp_value (float): The clamp value for the critic&#39;s weight clipping.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        connect_gpu(generator, critic, device): Assigns the generator and critic models to the specified device.</span>
+<span class="sd">        saved_checkpoints(model, epoch): Saves a checkpoint of the model at the specified epoch.</span>
+<span class="sd">        train_critic(real_samples, fake_samples): Trains the critic model for one batch of data.</span>
+<span class="sd">        train_generator(generated_samples): Trains the generator model for one batch of data.</span>
+<span class="sd">        train_WGAN(): Conducts the training loop for the WGAN.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">latent_space</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="mf">0.00005</span><span class="p">,</span>
+        <span class="n">beta1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">beta2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">n_critic_step</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the Trainer object with the specified configuration and sets up the neural network models, dataloader, loss function, and optimizers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            latent_space (int): Size of the latent space (input vector for the generator).</span>
+<span class="sd">            epochs (int): Number of epochs for training the models.</span>
+<span class="sd">            lr (float): Learning rate for the Adam optimizers.</span>
+<span class="sd">            beta1 (float): Beta1 hyperparameter for the Adam optimizer.</span>
+<span class="sd">            beta2 (float): Beta2 hyperparameter for the Adam optimizer.</span>
+<span class="sd">            device (str): The device (&#39;cuda&#39;, &#39;mps&#39;, or &#39;cpu&#39;) on which the models will run.</span>
+<span class="sd">            n_critic_step (int): Number of critic updates per generator update.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_space</span> <span class="o">=</span> <span class="n">latent_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta1</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta2</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_critic_step</span> <span class="o">=</span> <span class="n">n_critic_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">display</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span>
+            <span class="s2">&quot;mps&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span> <span class="o">=</span> <span class="n">Critic</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_gpu</span><span class="p">(</span>
+            <span class="n">generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">weight_initialization</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">weight_initialization</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;./data/processed/dataloader.pkl&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Dataloader is not transformed from pickle&quot;</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">RMSprop</span><span class="p">(</span>
+            <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+            <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">RMSprop</span><span class="p">(</span>
+            <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+            <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic_loss</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator_loss</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">connect_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects the generator and critic models to the specified computing device.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator (Generator): The generator model.</span>
+<span class="sd">            critic (Critic): The critic model.</span>
+<span class="sd">            device (str): The target device (&#39;cuda&#39;, &#39;mps&#39;, or &#39;cpu&#39;).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: The generator, critic, and device after assignment to the target device.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span><span class="p">)</span>
+            <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;mps&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span><span class="p">)</span>
+            <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Default to CPU if neither &#39;cuda&#39; nor &#39;mps&#39;</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span><span class="p">)</span>
+            <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="p">,</span> <span class="n">device</span>
+
+    <span class="k">def</span> <span class="nf">saved_checkpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a checkpoint of the given model at the specified epoch.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (nn.Module): The model to be saved.</span>
+<span class="sd">            epoch (int): The current epoch number for naming the saved file.</span>
+
+<span class="sd">        Side Effects:</span>
+<span class="sd">            Saves the model&#39;s state dictionary to the file system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;./models/checkpoints/generator_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pth&quot;</span>
+            <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoint saved for epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving checkpoint at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+    <span class="k">def</span> <span class="nf">train_critic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">real_samples</span><span class="p">,</span> <span class="n">fake_samples</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains the critic model for one batch of data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            real_samples (Tensor): Real samples from the dataset.</span>
+<span class="sd">            fake_samples (Tensor): Fake samples generated by the generator.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The total loss for the critic for the current batch.</span>
+
+<span class="sd">        Side Effects:</span>
+<span class="sd">            Updates the weights of the critic model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">real_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">real_samples</span><span class="p">)</span>
+        <span class="n">fake_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">fake_samples</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
+        <span class="n">total_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">real_predict</span><span class="p">)</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fake_predict</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">total_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">train_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generated_samples</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains the generator model for one batch of data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generated_samples (Tensor): Samples generated by the generator.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The loss for the generator for the current batch.</span>
+
+<span class="sd">        Side Effects:</span>
+<span class="sd">            Updates the weights of the generator model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">generated_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">generated_samples</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">generated_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">generated_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">display_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch [</span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epochs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">] Completed&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Average Critic Loss: </span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;avg_critic_loss&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,</span><span class="se">\</span>
+<span class="s2">            Average Generator Loss: </span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;avg_generator_loss&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">train_WGAN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Conducts the training loop for the Wasserstein Generative Adversarial Network (WGAN).</span>
+<span class="sd">        The loop iterates over the dataset, trains the critic and generator in alternation,</span>
+<span class="sd">        and records the loss for each epoch.</span>
+
+<span class="sd">        Process:</span>
+<span class="sd">        - For each epoch:</span>
+<span class="sd">            - For each batch in the dataloader:</span>
+<span class="sd">                - Train the critic using both real and fake data.</span>
+<span class="sd">                - Generate new fake samples and train the generator.</span>
+<span class="sd">                - Record and accumulate the loss for both the critic and generator.</span>
+<span class="sd">        - After each epoch, print the average losses and save the generator&#39;s state as a checkpoint.</span>
+
+<span class="sd">        Side Effects:</span>
+<span class="sd">        - Updates the weights of both the critic and generator models.</span>
+<span class="sd">        - Appends the average loss of each epoch to the respective loss lists (`critic_loss`, `generator_loss`).</span>
+<span class="sd">        - Saves the generator&#39;s state after each epoch.</span>
+<span class="sd">        - Prints the progress and average losses to the console.</span>
+
+<span class="sd">        Error Handling:</span>
+<span class="sd">        - If the model checkpoint cannot be saved, an exception is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">c_loss</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">g_loss</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">real_samples</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span><span class="p">):</span>
+                <span class="n">real_samples</span> <span class="o">=</span> <span class="n">real_samples</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="n">real_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_space</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+                <span class="p">)</span>
+                <span class="n">fake_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">)</span>
+
+                <span class="n">D_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_critic</span><span class="p">(</span>
+                    <span class="n">real_samples</span><span class="o">=</span><span class="n">real_samples</span><span class="p">,</span> <span class="n">fake_samples</span><span class="o">=</span><span class="n">fake_samples</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Clamp the weights of the critic</span>
+                <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_critic_step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">generated_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">)</span>
+                    <span class="n">G_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_generator</span><span class="p">(</span><span class="n">generated_samples</span><span class="o">=</span><span class="n">generated_samples</span><span class="p">)</span>
+
+                    <span class="n">c_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">D_loss</span><span class="p">)</span>
+                    <span class="n">g_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G_loss</span><span class="p">)</span>
+
+            <span class="n">avg_critic_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c_loss</span><span class="p">)</span>
+            <span class="n">avg_generator_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g_loss</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critic_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_critic_loss</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generator_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_generator_loss</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">display_performance</span><span class="p">(</span>
+                    <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+                    <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span>
+                    <span class="n">avg_critic_loss</span><span class="o">=</span><span class="n">avg_critic_loss</span><span class="p">,</span>
+                    <span class="n">avg_generator_loss</span><span class="o">=</span><span class="n">avg_generator_loss</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Please set display to True&quot;</span><span class="o">.</span><span class="n">capitalize</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch [</span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="si">}</span><span class="s2">] Completed&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Average Critic Loss: </span><span class="si">{</span><span class="n">avg_critic_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Average Generator Loss: </span><span class="si">{</span><span class="n">avg_generator_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">saved_checkpoints</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">latent_space</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">5e-05</span><span class="p">,</span> <span class="n">beta1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">beta2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">,</span> <span class="n">n_critic_step</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializes the Trainer object with the specified configuration and sets up the neural network models, dataloader, loss function, and optimizers.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>latent_space</code></b>
+                  (<code>int</code>, default:
+                      <code>100</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Size of the latent space (input vector for the generator).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epochs</code></b>
+                  (<code>int</code>, default:
+                      <code>100</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of epochs for training the models.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>lr</code></b>
+                  (<code>float</code>, default:
+                      <code>5e-05</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Learning rate for the Adam optimizers.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>beta1</code></b>
+                  (<code>float</code>, default:
+                      <code>0.5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Beta1 hyperparameter for the Adam optimizer.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>beta2</code></b>
+                  (<code>float</code>, default:
+                      <code>0.999</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Beta2 hyperparameter for the Adam optimizer.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>device</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;cpu&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The device ('cuda', 'mps', or 'cpu') on which the models will run.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_critic_step</code></b>
+                  (<code>int</code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of critic updates per generator update.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">latent_space</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">lr</span><span class="o">=</span><span class="mf">0.00005</span><span class="p">,</span>
+    <span class="n">beta1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">beta2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+    <span class="n">n_critic_step</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes the Trainer object with the specified configuration and sets up the neural network models, dataloader, loss function, and optimizers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latent_space (int): Size of the latent space (input vector for the generator).</span>
+<span class="sd">        epochs (int): Number of epochs for training the models.</span>
+<span class="sd">        lr (float): Learning rate for the Adam optimizers.</span>
+<span class="sd">        beta1 (float): Beta1 hyperparameter for the Adam optimizer.</span>
+<span class="sd">        beta2 (float): Beta2 hyperparameter for the Adam optimizer.</span>
+<span class="sd">        device (str): The device (&#39;cuda&#39;, &#39;mps&#39;, or &#39;cpu&#39;) on which the models will run.</span>
+<span class="sd">        n_critic_step (int): Number of critic updates per generator update.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">latent_space</span> <span class="o">=</span> <span class="n">latent_space</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">lr</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">beta1</span> <span class="o">=</span> <span class="n">beta1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">beta2</span> <span class="o">=</span> <span class="n">beta2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_critic_step</span> <span class="o">=</span> <span class="n">n_critic_step</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">display</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span>
+        <span class="s2">&quot;mps&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+    <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">critic</span> <span class="o">=</span> <span class="n">Critic</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_gpu</span><span class="p">(</span>
+        <span class="n">generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">weight_initialization</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">weight_initialization</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;./data/processed/dataloader.pkl&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Dataloader is not transformed from pickle&quot;</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">RMSprop</span><span class="p">(</span>
+        <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+        <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">RMSprop</span><span class="p">(</span>
+        <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+        <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">critic_loss</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">generator_loss</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.connect_gpu" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">connect_gpu</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Connects the generator and critic models to the specified computing device.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>generator</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="generator.Generator" href="../generator/#generator.Generator">Generator</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The generator model.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>critic</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="critic.Critic" href="../critic/#critic.Critic">Critic</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The critic model.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>device</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The target device ('cuda', 'mps', or 'cpu').</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>tuple</code></b>            –
+            <div class="doc-md-description">
+              <p>The generator, critic, and device after assignment to the target device.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">connect_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Connects the generator and critic models to the specified computing device.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        generator (Generator): The generator model.</span>
+<span class="sd">        critic (Critic): The critic model.</span>
+<span class="sd">        device (str): The target device (&#39;cuda&#39;, &#39;mps&#39;, or &#39;cpu&#39;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: The generator, critic, and device after assignment to the target device.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span><span class="p">:</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span><span class="p">)</span>
+        <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cuda</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;mps&quot;</span><span class="p">:</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span><span class="p">)</span>
+        <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Default to CPU if neither &#39;cuda&#39; nor &#39;mps&#39;</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span><span class="p">)</span>
+        <span class="n">critic</span> <span class="o">=</span> <span class="n">critic</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device_cpu</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">generator</span><span class="p">,</span> <span class="n">critic</span><span class="p">,</span> <span class="n">device</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.saved_checkpoints" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">saved_checkpoints</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Saves a checkpoint of the given model at the specified epoch.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>model</code></b>
+                  (<code><span title="torch.Module">Module</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The model to be saved.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epoch</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The current epoch number for naming the saved file.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<details class="side-effects" open>
+  <summary>Side Effects</summary>
+  <p>Saves the model's state dictionary to the file system.</p>
+</details>
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">saved_checkpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves a checkpoint of the given model at the specified epoch.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (nn.Module): The model to be saved.</span>
+<span class="sd">        epoch (int): The current epoch number for naming the saved file.</span>
+
+<span class="sd">    Side Effects:</span>
+<span class="sd">        Saves the model&#39;s state dictionary to the file system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;./models/checkpoints/generator_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pth&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoint saved for epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving checkpoint at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.train_WGAN" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">train_WGAN</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Conducts the training loop for the Wasserstein Generative Adversarial Network (WGAN).
+The loop iterates over the dataset, trains the critic and generator in alternation,
+and records the loss for each epoch.</p>
+<p>Process:
+- For each epoch:
+    - For each batch in the dataloader:
+        - Train the critic using both real and fake data.
+        - Generate new fake samples and train the generator.
+        - Record and accumulate the loss for both the critic and generator.
+- After each epoch, print the average losses and save the generator's state as a checkpoint.</p>
+<p>Side Effects:
+- Updates the weights of both the critic and generator models.
+- Appends the average loss of each epoch to the respective loss lists (<code>critic_loss</code>, <code>generator_loss</code>).
+- Saves the generator's state after each epoch.
+- Prints the progress and average losses to the console.</p>
+<p>Error Handling:
+- If the model checkpoint cannot be saved, an exception is raised.</p>
+
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_WGAN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Conducts the training loop for the Wasserstein Generative Adversarial Network (WGAN).</span>
+<span class="sd">    The loop iterates over the dataset, trains the critic and generator in alternation,</span>
+<span class="sd">    and records the loss for each epoch.</span>
+
+<span class="sd">    Process:</span>
+<span class="sd">    - For each epoch:</span>
+<span class="sd">        - For each batch in the dataloader:</span>
+<span class="sd">            - Train the critic using both real and fake data.</span>
+<span class="sd">            - Generate new fake samples and train the generator.</span>
+<span class="sd">            - Record and accumulate the loss for both the critic and generator.</span>
+<span class="sd">    - After each epoch, print the average losses and save the generator&#39;s state as a checkpoint.</span>
+
+<span class="sd">    Side Effects:</span>
+<span class="sd">    - Updates the weights of both the critic and generator models.</span>
+<span class="sd">    - Appends the average loss of each epoch to the respective loss lists (`critic_loss`, `generator_loss`).</span>
+<span class="sd">    - Saves the generator&#39;s state after each epoch.</span>
+<span class="sd">    - Prints the progress and average losses to the console.</span>
+
+<span class="sd">    Error Handling:</span>
+<span class="sd">    - If the model checkpoint cannot be saved, an exception is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="n">c_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">g_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">real_samples</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span><span class="p">):</span>
+            <span class="n">real_samples</span> <span class="o">=</span> <span class="n">real_samples</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="n">real_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">noise_samples</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_space</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+            <span class="p">)</span>
+            <span class="n">fake_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">)</span>
+
+            <span class="n">D_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_critic</span><span class="p">(</span>
+                <span class="n">real_samples</span><span class="o">=</span><span class="n">real_samples</span><span class="p">,</span> <span class="n">fake_samples</span><span class="o">=</span><span class="n">fake_samples</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Clamp the weights of the critic</span>
+            <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clamp_value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_critic_step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">generated_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">(</span><span class="n">noise_samples</span><span class="p">)</span>
+                <span class="n">G_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_generator</span><span class="p">(</span><span class="n">generated_samples</span><span class="o">=</span><span class="n">generated_samples</span><span class="p">)</span>
+
+                <span class="n">c_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">D_loss</span><span class="p">)</span>
+                <span class="n">g_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G_loss</span><span class="p">)</span>
+
+        <span class="n">avg_critic_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c_loss</span><span class="p">)</span>
+        <span class="n">avg_generator_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g_loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_critic_loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_generator_loss</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_performance</span><span class="p">(</span>
+                <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+                <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span>
+                <span class="n">avg_critic_loss</span><span class="o">=</span><span class="n">avg_critic_loss</span><span class="p">,</span>
+                <span class="n">avg_generator_loss</span><span class="o">=</span><span class="n">avg_generator_loss</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Please set display to True&quot;</span><span class="o">.</span><span class="n">capitalize</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch [</span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="si">}</span><span class="s2">] Completed&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Average Critic Loss: </span><span class="si">{</span><span class="n">avg_critic_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Average Generator Loss: </span><span class="si">{</span><span class="n">avg_generator_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_checkpoints</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.train_critic" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">train_critic</span><span class="p">(</span><span class="n">real_samples</span><span class="p">,</span> <span class="n">fake_samples</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Trains the critic model for one batch of data.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>real_samples</code></b>
+                  (<code>Tensor</code>)
+              –
+              <div class="doc-md-description">
+                <p>Real samples from the dataset.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>fake_samples</code></b>
+                  (<code>Tensor</code>)
+              –
+              <div class="doc-md-description">
+                <p>Fake samples generated by the generator.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>float</code></b>            –
+            <div class="doc-md-description">
+              <p>The total loss for the critic for the current batch.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+<details class="side-effects" open>
+  <summary>Side Effects</summary>
+  <p>Updates the weights of the critic model.</p>
+</details>
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_critic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">real_samples</span><span class="p">,</span> <span class="n">fake_samples</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains the critic model for one batch of data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        real_samples (Tensor): Real samples from the dataset.</span>
+<span class="sd">        fake_samples (Tensor): Fake samples generated by the generator.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The total loss for the critic for the current batch.</span>
+
+<span class="sd">    Side Effects:</span>
+<span class="sd">        Updates the weights of the critic model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">real_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">real_samples</span><span class="p">)</span>
+    <span class="n">fake_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">fake_samples</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">real_predict</span><span class="p">)</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fake_predict</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">total_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_critic</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="trainer.Trainer.train_generator" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">train_generator</span><span class="p">(</span><span class="n">generated_samples</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Trains the generator model for one batch of data.</p>
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>generated_samples</code></b>
+                  (<code>Tensor</code>)
+              –
+              <div class="doc-md-description">
+                <p>Samples generated by the generator.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+      <ul class="first simple">
+          <li>
+<b><code>float</code></b>            –
+            <div class="doc-md-description">
+              <p>The loss for the generator for the current batch.</p>
+            </div>
+          </li>
+      </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+<details class="side-effects" open>
+  <summary>Side Effects</summary>
+  <p>Updates the weights of the generator model.</p>
+</details>
+          <details class="quote">
+            <summary>Source code in <code>trainer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generated_samples</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains the generator model for one batch of data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        generated_samples (Tensor): Samples generated by the generator.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The loss for the generator for the current batch.</span>
+
+<span class="sd">    Side Effects:</span>
+<span class="sd">        Updates the weights of the generator model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">generated_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">generated_samples</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">generated_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_generator</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">generated_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../critic/" class="btn btn-neutral float-left" title="Critic"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../test/" class="btn btn-neutral float-right" title="Test">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../critic/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../test/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
