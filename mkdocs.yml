@@ -1,0 +1,15 @@
+site_name: Wasserstein GAN
+
+nav:
+  - Home: index.md
+  - DataLoader: data_loader.md
+  - Generator: generator.md
+  - Critic: critic.md
+  - Trainer: trainer.md
+  - Test: test.md
+  - Command Line: cli.md
+  - Utils: utils.md
+
+theme: readthedocs
+plugins:
+  - mkdocstrings
