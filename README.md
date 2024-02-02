@@ -137,8 +137,3 @@ Thanks to all contributors and users of the GPWGAN project. Special thanks to th
 ## Contact
 
 For any inquiries or suggestions, feel free to reach out to [atikulislamsajib137@gmail.com].
-
-## Additional Information
-
-- This project is a work in progress and subject to changes.
-- Feedback and suggestions are highly appreciated.
