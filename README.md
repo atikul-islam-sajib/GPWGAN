@@ -116,7 +116,7 @@ This script initializes the data loader, downloads the MNIST dataset, and prepar
 
 ## Documentation
 
-For detailed documentation on the implementation and usage, visit the [GPWGAN Documentation](https://github.com/atikul-islam-sajib/GPWGAN-deploy.git).
+For detailed documentation on the implementation and usage, visit the [GPWGAN Documentation](https://atikul-islam-sajib.github.io/GPWGAN-deploy/).
 
 ## Notebook Training
 
